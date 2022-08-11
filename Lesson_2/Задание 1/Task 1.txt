@@ -1,0 +1,10 @@
+﻿Создать таблицу для сущности Подписка. Необходимо реализовать возможность подписываться на пользователя или сообщество. Отчет необходимо сдать в виде текстового файла с командой CREATE TABLE.
+
+-- Таблица для сущности Подписка
+CREATE TABLE subscriptions (
+  id SERIAL PRIMARY KEY,
+  subscrubed_by_user_id INT NOT NULL,
+  subscrubed_to_user_or_community_id INT NOT NULL,
+  in_community BOOLEAN,
+  created_at TIMESTAMP
+);

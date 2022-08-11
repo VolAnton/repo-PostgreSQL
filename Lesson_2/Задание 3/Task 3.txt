@@ -1,0 +1,292 @@
+﻿Создать дамп базы данных vk. Создать новую базу данных vk_staging. Загрузить созданный ранее дамп в базу данных vk_staging. Проверить корректность загрузки выполнением SQL запроса.
+
+postgres@volanton-VirtualBox:~$ createdb vk_staging
+
+postgres@volanton-VirtualBox:~$ cd pg_backups/
+
+postgres@volanton-VirtualBox:~/pg_backups$ psql vk_staging < vk.dump.sql 
+
+SET
+
+SET
+
+SET
+
+SET
+
+SET
+
+ set_config 
+
+------------
+
+ 
+
+(1 row)
+
+
+
+SET
+
+SET
+
+SET
+
+SET
+
+SET
+
+SET
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+CREATE TABLE
+
+ALTER TABLE
+
+CREATE SEQUENCE
+
+ALTER TABLE
+
+ALTER SEQUENCE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+COPY 100
+
+COPY 100
+
+COPY 100
+
+COPY 5
+
+COPY 100
+
+COPY 100
+
+COPY 100
+
+COPY 100
+
+COPY 100
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+      5
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ setval 
+
+--------
+
+    100
+
+(1 row)
+
+
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+ALTER TABLE
+
+postgres@volanton-VirtualBox:~/pg_backups$ 
+
+postgres@volanton-VirtualBox:~/pg_backups$ psql
+
+postgres=# \c vk_staging 
+
+You are now connected to database "vk_staging" as user "postgres".
+
+vk_staging=# SELECT * FROM users LIMIT 3;
+
+id | first_name | last_name |               email               |      phone      | main_photo_id |     created_at      
+
+----+------------+-----------+-----------------------------------+-----------------+---------------+---------------------
+
+  1 | Alana      | Berger    | placerat.eget@google.edu          | (073) 53771967  |            82 | 2023-05-12 00:00:00
+
+  2 | Barclay    | Olsen     | amet.metus.aliquam@protonmail.net | (01234) 4661812 |            33 | 2022-02-24 00:00:00
+
+  3 | Valentine  | Whitley   | quam.quis.diam@hotmail.ca         | (036994) 133677 |            87 | 2023-04-22 00:00:00
+
+(3 rows)
+
+
+
