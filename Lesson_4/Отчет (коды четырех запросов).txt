@@ -1,0 +1,192 @@
+Работаем с базой данных vk. Найти, кому принадлежат 10 самых больших видеофайлов. В отчёт вывести идентификатор видеофайла, имя владельца, фамилию владельца, URL основной фотографии пользователя, URL видеофайла, размер видеофайла.
+
+Решить задачу, применив различные подходы:
+- Найти решение только на вложенных запросах
+
+SELECT
+  id,
+  (SELECT first_name FROM users WHERE users.id=video.owner_id) AS first_name,
+  (SELECT last_name FROM users WHERE users.id=video.owner_id) AS last_name,
+  (SELECT (SELECT url FROM photo WHERE photo.id=users.main_photo_id) FROM users WHERE users.id=video.owner_id) AS main_photo_url,
+  url AS video_file_url,
+  size
+FROM video ORDER BY size DESC LIMIT 10;
+
+Ответ#1 из базы данных:
+  id | first_name | last_name  | main_photo_url | video_file_url | size 
+
+----+------------+------------+----------------+----------------+------
+
+ 35 | Ivy        | Mitchell   | 53             | 35             |   98
+
+ 75 | Alec       | Barnett    | 31             | 75             |   96
+
+ 94 | Jerome     | Estrada    | 41             | 94             |   96
+
+ 70 | Jerome     | Estrada    | 41             | 70             |   95
+
+ 60 | Penelope   | Williamson | 57             | 60             |   94
+
+ 81 | Shannon    | Roy        | 58             | 81             |   94
+
+ 42 | Keelie     | Calhoun    | 64             | 42             |   93
+
+ 96 | Tobias     | Moon       | 80             | 96             |   92
+
+ 13 | Regan      | Berger     | 74             | 13             |   89
+
+ 56 | Gage       | Lindsay    | 39             | 56             |   86
+
+(10 rows)
+
+- Найти решение с использованием временной таблицы
+
+CREATE TEMPORARY TABLE the_biggest_size_of_video_files(
+  id INT,
+  url VARCHAR(250),
+  size INT,
+  owner_id INT
+);
+
+INSERT INTO the_biggest_size_of_video_files
+  SELECT
+    id,
+    url,
+    size,
+    owner_id
+FROM video ORDER BY SIZE DESC LIMIT 10;
+
+SELECT
+  the_biggest_size_of_video_files.id AS id,
+  first_name,
+  last_name,
+  photo.url AS main_photo_url,
+  the_biggest_size_of_video_files.url AS video_file_url,
+  the_biggest_size_of_video_files.size AS size
+FROM users
+  JOIN the_biggest_size_of_video_files
+    ON the_biggest_size_of_video_files.owner_id=users.id
+  LEFT JOIN photo
+    ON photo.id=users.main_photo_id;
+
+Ответ#2 из базы данных:
+id | first_name | last_name  | main_photo_url | video_file_url | size 
+
+----+------------+------------+----------------+----------------+------
+
+ 35 | Ivy        | Mitchell   | 53             | 35             |   98
+
+ 75 | Alec       | Barnett    | 31             | 75             |   96
+
+ 94 | Jerome     | Estrada    | 41             | 94             |   96
+
+ 70 | Jerome     | Estrada    | 41             | 70             |   95
+
+ 60 | Penelope   | Williamson | 57             | 60             |   94
+
+ 81 | Shannon    | Roy        | 58             | 81             |   94
+
+ 42 | Keelie     | Calhoun    | 64             | 42             |   93
+
+ 96 | Tobias     | Moon       | 80             | 96             |   92
+
+ 13 | Regan      | Berger     | 74             | 13             |   89
+
+ 56 | Gage       | Lindsay    | 39             | 56             |   86
+
+(10 rows)
+
+- Найти решение с использованием общего табличного выражения
+
+WITH
+the_biggest_size_of_video_files AS (
+  SELECT
+    id,
+    url,
+    size,
+    owner_id
+  FROM video ORDER BY size DESC LIMIT 10)
+SELECT
+  the_biggest_size_of_video_files.id AS id,
+  first_name,
+  last_name,
+  photo.url AS main_photo_url,
+  the_biggest_size_of_video_files.url AS video_file_url,
+  the_biggest_size_of_video_files.size AS size
+FROM users
+  JOIN the_biggest_size_of_video_files
+    ON the_biggest_size_of_video_files.owner_id=users.id
+  LEFT JOIN photo
+    ON photo.id=users.main_photo_id
+ORDER BY size DESC;
+
+Ответ#3 из базы данных:
+id | first_name | last_name  | main_photo_url | video_file_url | size 
+
+----+------------+------------+----------------+----------------+------
+
+ 35 | Ivy        | Mitchell   | 53             | 35             |   98
+
+ 75 | Alec       | Barnett    | 31             | 75             |   96
+
+ 94 | Jerome     | Estrada    | 41             | 94             |   96
+
+ 70 | Jerome     | Estrada    | 41             | 70             |   95
+
+ 60 | Penelope   | Williamson | 57             | 60             |   94
+
+ 81 | Shannon    | Roy        | 58             | 81             |   94
+
+ 42 | Keelie     | Calhoun    | 64             | 42             |   93
+
+ 96 | Tobias     | Moon       | 80             | 96             |   92
+
+ 13 | Regan      | Berger     | 74             | 13             |   89
+
+ 56 | Gage       | Lindsay    | 39             | 56             |   86
+
+(10 rows)
+
+
+- Найти решение с помощью объединения JOIN
+
+SELECT
+  video.id as id,
+  first_name,
+  last_name,
+  photo.url AS main_photo_url,
+  video.url AS video_file_url,
+  video.size AS size
+FROM users
+  JOIN video
+    ON video.owner_id=users.id
+  LEFT JOIN photo
+    ON photo.id=users.main_photo_id
+ORDER BY size DESC LIMIT 10;
+
+Ответ#4 из базы данных:
+id | first_name | last_name  | main_photo_url | video_file_url | size 
+
+----+------------+------------+----------------+----------------+------
+
+ 35 | Ivy        | Mitchell   | 53             | 35             |   98
+
+ 75 | Alec       | Barnett    | 31             | 75             |   96
+
+ 94 | Jerome     | Estrada    | 41             | 94             |   96
+
+ 70 | Jerome     | Estrada    | 41             | 70             |   95
+
+ 60 | Penelope   | Williamson | 57             | 60             |   94
+
+ 81 | Shannon    | Roy        | 58             | 81             |   94
+
+ 42 | Keelie     | Calhoun    | 64             | 42             |   93
+
+ 96 | Tobias     | Moon       | 80             | 96             |   92
+
+ 13 | Regan      | Berger     | 74             | 13             |   89
+
+ 56 | Gage       | Lindsay    | 39             | 56             |   86
+
+(10 rows)
