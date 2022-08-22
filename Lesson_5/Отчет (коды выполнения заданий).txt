@@ -1,0 +1,109 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Создать роли для пользователей Федор Серов и Роман Белов. Создать роли для групп аналитиков и тестировщиков. Поместить пользователя Федор Серов в группу аналитиков а пользователя Роман Белов в группу тестировщиков. Дать группе аналитиков право только на чтение данных в БД vk. Дать группе тестировщиков все права в БД vk. Подключиться к БД vk под обоими пользователями и проверить права выполнив простые операции SQL.
+
+CREATE ROLE serovf LOGIN;
+CREATE ROLE belovr LOGIN;
+
+CREATE ROLE analytics;
+CREATE ROLE testers;
+
+GRANT analytics TO serovf;
+GRANT testers TO belovr;
+
+ALTER ROLE serovf WITH PASSWORD 'qwerty';
+ALTER ROLE belovr WITH PASSWORD 'qwerty';
+
+\c vk
+
+GRANT ALL ON ALL TABLES IN SCHEMA public TO testers;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO testers;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO analytics;
+
+psql -U serovf -d vk -h 127.0.0.1 -W
+vk=> UPDATE users SET first_name = 'Change' WHERE id = 1;
+ERROR:  permission denied for table users
+
+vk=> SELECT * FROM users LIMIT 10;
+
+id | first_name | last_name |              email               |      phone      | main_photo_id |     created_at      |                    user_contacts                     
+
+----+------------+-----------+----------------------------------+-----------------+---------------+---------------------+------------------------------------------------------
+
+ 12 | Lois       | Travis    | sit.amet@icloud.edu              | (07623) 1986431 |            80 | 2021-10-09 00:00:00 | ("(07623) 1986431",sit.amet@icloud.edu)
+
+ 13 | Joelle     | Garrison  | sem.elit.pharetra@yahoo.com      | (0045) 11396874 |            31 | 2022-03-12 00:00:00 | ("(0045) 11396874",sem.elit.pharetra@yahoo.com)
+
+ 14 | Tobias     | Moon      | sed.eu@google.org                | (03741) 4988942 |            80 | 2022-09-01 00:00:00 | ("(03741) 4988942",sed.eu@google.org)
+
+ 15 | Jack       | Graham    | et@icloud.couk                   | (0975) 76860021 |            40 | 2021-10-08 00:00:00 | ("(0975) 76860021",et@icloud.couk)
+
+ 16 | Isabelle   | Montoya   | metus@aol.org                    | (034671) 722312 |            55 | 2023-05-20 00:00:00 | ("(034671) 722312",metus@aol.org)
+
+ 17 | Aphrodite  | Pugh      | tristique.ac.eleifend@icloud.com | (02134) 4466823 |             9 | 2021-12-17 00:00:00 | ("(02134) 4466823",tristique.ac.eleifend@icloud.com)
+
+ 18 | Flavia     | Lynn      | eu@protonmail.couk               | (034465) 382713 |            56 | 2022-12-12 00:00:00 | ("(034465) 382713",eu@protonmail.couk)
+
+ 19 | Ginger     | Leon      | ullamcorper@aol.com              | (031691) 917681 |            51 | 2021-10-13 00:00:00 | ("(031691) 917681",ullamcorper@aol.com)
+
+ 20 | Nehru      | Dillon    | suspendisse@hotmail.com          | (0652) 82183346 |            12 | 2022-09-22 00:00:00 | ("(0652) 82183346",suspendisse@hotmail.com)
+
+ 22 | Avram      | Walton    | urna.nunc@protonmail.couk        | (038902) 147387 |            70 | 2022-08-06 00:00:00 | ("(038902) 147387",urna.nunc@protonmail.couk)
+
+(10 rows)
+
+psql -U belovr -d vk -h 127.0.0.1 -W
+vk=> UPDATE users SET first_name = 'Change' WHERE id = 1;
+UPDATE 1
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+2. Установить любое расширение PostgreSQL на ваш выбор.
+
+postgres=# CREATE EXTENSION "isn";
+
+CREATE EXTENSION
+
+postgres=# SELECT * FROM pg_extension WHERE extname = 'isn';
+
+  oid  | extname | extowner | extnamespace | extrelocatable | extversion | extconfig | extcondition 
+
+-------+---------+----------+--------------+----------------+------------+-----------+--------------
+
+ 16809 | isn     |       10 |         2200 | t              | 1.2        |           | 
+
+(1 row)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+3. Выполнить вертикальное разделение таблицы пользователей на таблицу пользователей (users) и таблицу профилей (profiles). В таблице пользователей оставить только столбцы идентификатора, имени, фамилии, электронной почты и телефона. Все остальные столбцы вместе с данными необходимо перенести в таблицу профилей.
+
+CREATE TABLE profiles (
+  user_id INT NOT NULL,
+  main_photo_id INT NOT NULL,
+  users_contacts contacts,
+  created_at TIMESTAMP,
+  PRIMARY KEY (user_id)
+);
+
+ALTER TABLE profiles
+  ADD CONSTRAINT profiles_user_id_fk
+  FOREIGN KEY (user_id)
+  REFERENCES users (id);
+
+ALTER TABLE profiles
+  ADD CONSTRAINT profiles_main_photo_id_fk
+  FOREIGN KEY (main_photo_id)
+  REFERENCES photo (id);
+
+INSERT INTO profiles (user_id, main_photo_id, users_contacts, created_at)
+  SELECT id, main_photo_id, user_contacts, created_at FROM users;
+
+ALTER TABLE users
+  DROP COLUMN main_photo_id,
+  DROP COLUMN user_contacts,
+  DROP COLUMN created_at;
