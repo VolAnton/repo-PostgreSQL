@@ -1,0 +1,31 @@
+7.	Создать два представления, в основе которых лежат сложные запросы.
+--1 Создадим представление запроса того, кто из покупателей не сделал ни одного заказа (выведем его имя)
+CREATE OR REPLACE VIEW customers_without_order_view AS
+SELECT
+  CONCAT(customers.first_name,' ',customers.last_name) AS name
+  FROM customers
+    LEFT JOIN orders
+    ON orders.customer_id = customers.id
+  WHERE orders.customer_id IS NULL
+  ORDER BY name;
+
+SELECT * FROM customers_without_order_view;  
+
+--2 Создадим представление запроса имя и общую стоимость всех заказов у покупателя, который заказал на самую большую сумму (на экран выведем имя и общую сумму всех заказов)
+CREATE OR REPLACE VIEW customer_who_make_biggest_total_price_orders_view AS
+SELECT
+  CONCAT(customers.first_name,' ',customers.last_name) AS name,  
+  sum(order_products.count*catalog.price) AS total_price
+  FROM order_products  
+    INNER JOIN catalog
+    ON order_products.product_id=catalog.id
+    INNER JOIN orders
+    ON order_products.order_id=orders.id
+    INNER JOIN customers
+    ON orders.customer_id=customers.id  
+  GROUP BY name
+  ORDER BY total_price DESC
+  LIMIT 1;
+  
+SELECT * FROM customer_who_make_biggest_total_price_orders_view;  
+

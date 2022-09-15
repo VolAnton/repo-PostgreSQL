@@ -1,0 +1,25 @@
+6.	Создать два сложных запроса с использованием объединения JOIN и без использования подзапросов.
+--1 Узнаем имя и общую стоимость всех заказов у покупателя, который заказал на самую большую сумму (на экран выведем имя и общую сумму всех заказов)
+SELECT
+  CONCAT(customers.first_name,' ',customers.last_name) AS name,  
+  sum(order_products.count*catalog.price) AS total_price
+  FROM order_products  
+    INNER JOIN catalog
+    ON order_products.product_id=catalog.id
+    INNER JOIN orders
+    ON order_products.order_id=orders.id
+    INNER JOIN customers
+    ON orders.customer_id=customers.id  
+  GROUP BY name
+  ORDER BY total_price DESC
+  LIMIT 1;
+
+--2 Узнаем кто из покупателей не сделал ни одного заказа (выведем его имя)
+SELECT
+  first_name
+  FROM customers
+    LEFT JOIN orders
+    ON orders.customer_id = customers.id
+  WHERE orders.customer_id IS NULL
+  ORDER BY first_name;
+
