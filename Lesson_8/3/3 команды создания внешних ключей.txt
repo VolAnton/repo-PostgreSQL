@@ -1,0 +1,49 @@
+-- для Таблицы каталог товаров
+ALTER TABLE catalog 
+ADD CONSTRAINT catalog_category_id_fk
+  FOREIGN KEY (category_id)
+  REFERENCES categories(id);
+
+ALTER TABLE catalog 
+  ADD CONSTRAINT catalog_brend_id_fk
+  FOREIGN KEY (brend_id)
+  REFERENCES brends(id);
+
+ALTER TABLE catalog 
+  ADD CONSTRAINT catalog_product_type_id_fk
+  FOREIGN KEY (product_type_id)
+  REFERENCES product_types(id);
+
+ALTER TABLE catalog 
+  ADD CONSTRAINT catalog_age_type_id_fk
+  FOREIGN KEY (age_type_id)
+  REFERENCES age_types(id);
+
+ALTER TABLE catalog 
+  ADD CONSTRAINT catalog_season_type_id_fk
+  FOREIGN KEY (season_type_id)
+  REFERENCES season_types(id);
+
+-- для Таблицы заказов
+ALTER TABLE orders
+  ADD CONSTRAINT orders_customer_id_fk
+  FOREIGN KEY (customer_id)
+  REFERENCES customers(id);
+
+ALTER TABLE orders
+  ADD CONSTRAINT orders_adress_id_fk
+  FOREIGN KEY (adress_id)
+  REFERENCES adresses(id);
+
+-- для Таблицы заказанных товаров
+ALTER TABLE order_products 
+  ADD CONSTRAINT order_products_order_id_fk
+  FOREIGN KEY (order_id)
+  REFERENCES orders(id)
+  ON DELETE CASCADE;
+
+ALTER TABLE order_products 
+  ADD CONSTRAINT order_products_product_id_fk
+  FOREIGN KEY (product_id)
+  REFERENCES catalog(id)
+  ON DELETE CASCADE;

@@ -1,0 +1,22 @@
+5.	Создать два сложных (многотабличных) запроса с использованием подзапросов.
+-- 1 Узнаем сколько всего заказов имеет пользователь с email = 'nec@google.org' (на экран выведем его имя и фамилию, и количество заказов)
+SELECT 
+  (SELECT
+     CONCAT(first_name, ' ', last_name)
+     FROM customers
+     WHERE customers.id = (SELECT id FROM customers WHERE email = 'nec@google.org')) AS customer_name,
+  COUNT(*)
+FROM orders
+WHERE orders.customer_id = (SELECT id FROM customers WHERE email = 'nec@google.org');
+
+--2 Узнаем какие товары были заказаны больше 190 раз (выведем на экран название категории товара, суммарное количество заказов данного товара, id этого товара)
+SELECT
+  (SELECT product_types.product_type_name FROM product_types WHERE product_types.id = 
+  (SELECT catalog.product_type_id FROM catalog WHERE order_products.product_id=catalog.id)) AS name,  
+  SUM(order_products.count) AS count,
+  order_products.product_id AS id
+  FROM order_products
+    GROUP BY order_products.product_id
+      HAVING SUM(order_products.count) > 190
+	ORDER BY count DESC;
+

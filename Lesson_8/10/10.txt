@@ -1,0 +1,63 @@
+10.	Для одного из запросов, созданных в пункте 6, провести оптимизацию. В качестве отчета приложить планы выполнения запроса, ваш анализ и показать действия, которые улучшили эффективность запроса. 
+
+
+-- Для этогог запроса (кто из покупателей не сделал ни одного заказа (выведем его имя)) проведем оотимизацию.
+SELECT
+  first_name
+  FROM customers
+    LEFT JOIN orders
+    ON orders.customer_id = customers.id
+  WHERE orders.customer_id IS NULL
+  ORDER BY first_name;
+
+-- До оптимизации
+"Sort  (cost=8.19..8.29 rows=38 width=6) (actual time=0.047..0.049 rows=38 loops=1)"
+"  Sort Key: customers.first_name"
+"  Sort Method: quicksort  Memory: 26kB"
+"  ->  Hash Anti Join  (cost=3.25..7.19 rows=38 width=6) (actual time=0.021..0.031 rows=38 loops=1)"
+"        Hash Cond: (customers.id = orders.customer_id)"
+"        ->  Seq Scan on customers  (cost=0.00..3.00 rows=100 width=10) (actual time=0.003..0.006 rows=100 loops=1)"
+"        ->  Hash  (cost=2.00..2.00 rows=100 width=4) (actual time=0.014..0.014 rows=100 loops=1)"
+"              Buckets: 1024  Batches: 1  Memory Usage: 12kB"
+"              ->  Seq Scan on orders  (cost=0.00..2.00 rows=100 width=4) (actual time=0.002..0.007 rows=100 loops=1)"
+"Planning Time: 0.105 ms"
+"Execution Time: 0.060 ms"
+
+-- Чтобы сортировка работала быстрее есть предложение создать индексы
+CREATE INDEX orders_customer_id_idx ON orders (customer_id);
+CREATE INDEX customers_id_idx ON customers (id);
+CREATE INDEX customers_first_name_idx ON customers (first_name);
+
+
+
+-- После оптимизации,
+"Sort  (cost=8.19..8.29 rows=38 width=6) (actual time=0.047..0.049 rows=38 loops=1)"
+"  Sort Key: customers.first_name"
+"  Sort Method: quicksort  Memory: 26kB"
+"  ->  Hash Anti Join  (cost=3.25..7.19 rows=38 width=6) (actual time=0.021..0.031 rows=38 loops=1)"
+"        Hash Cond: (customers.id = orders.customer_id)"
+"        ->  Seq Scan on customers  (cost=0.00..3.00 rows=100 width=10) (actual time=0.003..0.007 rows=100 loops=1)"
+"        ->  Hash  (cost=2.00..2.00 rows=100 width=4) (actual time=0.014..0.014 rows=100 loops=1)"
+"              Buckets: 1024  Batches: 1  Memory Usage: 12kB"
+"              ->  Seq Scan on orders  (cost=0.00..2.00 rows=100 width=4) (actual time=0.002..0.007 rows=100 loops=1)"
+"Planning Time: 0.099 ms"
+"Execution Time: 0.062 ms"
+
+Вывод: из-за малого количетсва строк результаты сильно не отличаются, так как сервер "умный" и решает сам (по-своему) какой метод выборки использовать.
+
+
+
+
+--После отключения последовательгного сканирования получились такие результаты. Они не сильно отличаются от прежних.
+SET enable_seqscan TO OFF;
+
+"Sort  (cost=30.78..30.88 rows=38 width=6) (actual time=0.050..0.052 rows=38 loops=1)"
+"  Sort Key: customers.first_name"
+"  Sort Method: quicksort  Memory: 26kB"
+"  ->  Merge Anti Join  (cost=0.29..29.79 rows=38 width=6) (actual time=0.008..0.034 rows=38 loops=1)"
+"        Merge Cond: (customers.id = orders.customer_id)"
+"        ->  Index Scan using customers_id_idx on customers  (cost=0.14..14.64 rows=100 width=10) (actual time=0.002..0.009 rows=100 loops=1)"
+"        ->  Index Only Scan using orders_customer_id_idx on orders  (cost=0.14..13.64 rows=100 width=4) (actual time=0.002..0.012 rows=98 loops=1)"
+"              Heap Fetches: 98"
+"Planning Time: 0.098 ms"
+"Execution Time: 0.063 ms"

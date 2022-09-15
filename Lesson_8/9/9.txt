@@ -1,0 +1,28 @@
+9.	Создать триггер.
+-- Будет проверяться имя и фамилию покупателя на запрещенные слова, которые будут храниться в таблице banned_words
+CREATE TABLE banned_words(
+	word VARCHAR (255)
+);
+
+CREATE OR REPLACE FUNCTION update_customer_name()
+RETURNS TRIGGER AS
+$$
+DECLARE is_found BOOLEAN;
+BEGIN
+  is_found := EXISTS(SELECT * FROM banned_words WHERE NEW.body LIKE '%' || word || '%');
+  IF is_found THEN
+    NEW.boby := '_MODERATED_';
+  END IF;
+  RETURN NEW;
+END  
+$$
+LANGUAGE PLPGSQL;
+
+CREATE TRIGGER check_customer_name_on_update BEFORE UPDATE ON customers
+  FOR EACH ROW
+  EXECUTE FUNCTION update_customer_name();
+  
+CREATE TRIGGER check_customer_name_on_insert BEFORE INSERT ON customers
+  FOR EACH ROW
+  EXECUTE FUNCTION update_customer_name();
+

@@ -1,0 +1,18 @@
+8.	Создать пользовательскую функцию.
+-- Функция возвращает id покупателя, который сделал больше всего заказов
+DROP FUNCTION IF EXISTS get_customer_id_whom_make_more_orders;
+
+CREATE FUNCTION get_customer_id_whom_make_more_orders()
+RETURNS INTEGER AS
+$$
+  SELECT
+  customer_id
+  FROM orders  
+  GROUP BY customer_id
+  ORDER BY COUNT(*) DESC
+  LIMIT 1;
+$$
+LANGUAGE sql;
+
+SELECT get_customer_id_whom_make_more_orders();	
+

@@ -1,0 +1,72 @@
+-- Таблица каталог товаров
+CREATE TABLE catalog (
+  id SERIAL PRIMARY KEY,
+  category_id INT NOT NULL,
+  brend_id INT NOT NULL,
+  product_type_id INT NOT NULL,
+  age_type_id INT NOT NULL,
+  season_type_id INT NOT NULL,
+  price MONEY
+);
+
+-- Таблица категория товара
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  category_name VARCHAR(120) NOT NULL  
+);
+
+-- Таблица бренд товара
+CREATE TABLE brends (
+  id SERIAL PRIMARY KEY,
+  brand_name VARCHAR(120) NOT NULL  
+);
+
+-- Таблица тип товара
+CREATE TABLE product_types (
+  id SERIAL PRIMARY KEY,
+  product_type_name VARCHAR(120) NOT NULL  
+);
+
+-- Таблица на какой возраст товар
+CREATE TABLE age_types (
+  id SERIAL PRIMARY KEY,
+  age_type_name VARCHAR(120) NOT NULL  
+);
+
+-- Таблица на какой сезон товар
+CREATE TABLE season_types (
+  id SERIAL PRIMARY KEY,
+  season_type_name VARCHAR(120) NOT NULL  
+);
+
+-- Таблица покупателей
+CREATE TABLE customers (
+  id SERIAL PRIMARY KEY,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  phone VARCHAR(15) UNIQUE,  
+  created_at TIMESTAMP
+);
+
+-- Таблица адресов доставки пунктов выдачи товара
+CREATE TABLE adresses (
+  id SERIAL PRIMARY KEY,
+  adress_name VARCHAR(250) NOT NULL  
+);
+
+-- Таблица заказов
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  customer_id INT NOT NULL,
+  adress_id INT NOT NULL,
+  created_at TIMESTAMP  
+);
+
+-- Таблица заказанных товаров
+CREATE TABLE order_products (
+  order_id INT NOT NULL,
+  product_id INT NOT NULL,
+  count INT NOT NULL,
+  PRIMARY KEY (order_id, product_id)
+);
